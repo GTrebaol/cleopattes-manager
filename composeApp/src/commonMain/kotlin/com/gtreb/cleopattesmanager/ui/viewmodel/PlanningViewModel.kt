@@ -5,6 +5,10 @@ import com.gtreb.cleopattesmanager.data.model.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -81,7 +85,40 @@ class PlanningViewModel(
     }
     
     fun goToToday() {
-        setCurrentDate(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date)
+        updateCurrentDate(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date)
+    }
+    
+    fun setCurrentDate(date: LocalDate) {
+        if (_planningUiState.value.isTransitioning) return
+        updateCurrentDate(date)
+    }
+    
+    private fun updateCurrentDate(date: LocalDate) {
+        _planningUiState.value = _planningUiState.value.copy(
+            currentDate = date,
+            isTransitioning = true
+        )
+        loadTimeSlots()
+        
+        // Reset transition state after a short delay
+        CoroutineScope(Dispatchers.Main).launch {
+            delay(350) // Slightly longer than animation duration
+            _planningUiState.value = _planningUiState.value.copy(isTransitioning = false)
+        }
+    }
+    
+    fun navigateToPreviousDay() {
+        if (_planningUiState.value.isTransitioning) return
+        val currentDate = _planningUiState.value.currentDate
+        val newDate = currentDate - DatePeriod(days = 1)
+        updateCurrentDate(newDate)
+    }
+    
+    fun navigateToNextDay() {
+        if (_planningUiState.value.isTransitioning) return
+        val currentDate = _planningUiState.value.currentDate
+        val newDate = currentDate + DatePeriod(days = 1)
+        updateCurrentDate(newDate)
     }
     
     fun deleteTimeSlot() {
@@ -104,29 +141,35 @@ class PlanningViewModel(
             val currentDate = _planningUiState.value.currentDate
             val calendarView = _planningUiState.value.calendarView
             
-            val timeSlots = when (calendarView) {
+            when (calendarView) {
                 CalendarViewType.DAY -> {
                     val startOfDay = currentDate.toEpochDays() * 24 * 60 * 60 * 1000
                     val endOfDay = startOfDay + (24 * 60 * 60 * 1000) - 1
-                    repository.timeSlotRepository.getTimeSlotsWithDetailsForDateRange(startOfDay, endOfDay)
+                    val timeSlots = repository.timeSlotRepository.getTimeSlotsWithDetailsForDateRange(startOfDay, endOfDay)
+                    
+                    _planningUiState.value = _planningUiState.value.copy(
+                        timeSlotsForSelectedDate = timeSlots
+                    )
                 }
                 CalendarViewType.WEEK -> {
                     val startOfWeek = currentDate.toEpochDays() * 24 * 60 * 60 * 1000
                     val endOfWeek = startOfWeek + (7 * 24 * 60 * 60 * 1000) - 1
-                    repository.timeSlotRepository.getTimeSlotsWithDetailsForDateRange(startOfWeek, endOfWeek)
+                    val timeSlots = repository.timeSlotRepository.getTimeSlotsWithDetailsForDateRange(startOfWeek, endOfWeek)
+                    
+                    _planningUiState.value = _planningUiState.value.copy(
+                        timeSlotsForSelectedWeek = timeSlots
+                    )
                 }
                 CalendarViewType.MONTH -> {
                     val startOfMonth = currentDate.toEpochDays() * 24 * 60 * 60 * 1000
                     val endOfMonth = startOfMonth + (30 * 24 * 60 * 60 * 1000) - 1
-                    repository.timeSlotRepository.getTimeSlotsWithDetailsForDateRange(startOfMonth, endOfMonth)
+                    val timeSlots = repository.timeSlotRepository.getTimeSlotsWithDetailsForDateRange(startOfMonth, endOfMonth)
+                    
+                    _planningUiState.value = _planningUiState.value.copy(
+                        timeSlotsForSelectedMonth = timeSlots
+                    )
                 }
             }
-            
-            _planningUiState.value = _planningUiState.value.copy(
-                timeSlotsForSelectedDate = timeSlots,
-                timeSlotsForSelectedWeek = timeSlots,
-                timeSlotsForSelectedMonth = timeSlots
-            )
         }
     }
     
@@ -163,8 +206,6 @@ class PlanningViewModel(
         currentTimeSlots.add(newTimeSlotWithDetails)
         _planningUiState.value = _planningUiState.value.copy(
             timeSlotsForSelectedDate = currentTimeSlots,
-            timeSlotsForSelectedWeek = currentTimeSlots,
-            timeSlotsForSelectedMonth = currentTimeSlots,
             showAddTimeSlotDialog = false
         )
         
@@ -177,9 +218,7 @@ class PlanningViewModel(
             if (index != -1) {
                 updatedTimeSlots[index] = newTimeSlotWithDetails.copy(timeSlot = updatedTimeSlot)
                 _planningUiState.value = _planningUiState.value.copy(
-                    timeSlotsForSelectedDate = updatedTimeSlots,
-                    timeSlotsForSelectedWeek = updatedTimeSlots,
-                    timeSlotsForSelectedMonth = updatedTimeSlots
+                    timeSlotsForSelectedDate = updatedTimeSlots
                 )
             }
         }
@@ -193,8 +232,6 @@ class PlanningViewModel(
             currentTimeSlots[index] = currentTimeSlots[index].copy(timeSlot = timeSlot)
             _planningUiState.value = _planningUiState.value.copy(
                 timeSlotsForSelectedDate = currentTimeSlots,
-                timeSlotsForSelectedWeek = currentTimeSlots,
-                timeSlotsForSelectedMonth = currentTimeSlots,
                 showEditTimeSlotDialog = false
             )
         }
@@ -214,9 +251,7 @@ class PlanningViewModel(
         val currentTimeSlots = _planningUiState.value.timeSlotsForSelectedDate.toMutableList()
         currentTimeSlots.removeAll { it.timeSlot.id == BaseId }
         _planningUiState.value = _planningUiState.value.copy(
-            timeSlotsForSelectedDate = currentTimeSlots,
-            timeSlotsForSelectedWeek = currentTimeSlots,
-            timeSlotsForSelectedMonth = currentTimeSlots
+            timeSlotsForSelectedDate = currentTimeSlots
         )
         
         // Launch async operation in background
@@ -227,11 +262,6 @@ class PlanningViewModel(
                 loadTimeSlots()
             }
         }
-    }
-    
-    private fun setCurrentDate(date: LocalDate) {
-        _planningUiState.value = _planningUiState.value.copy(currentDate = date)
-        loadTimeSlots()
     }
     
     private fun setCalendarViewType(viewType: CalendarViewType) {
@@ -246,7 +276,7 @@ class PlanningViewModel(
             CalendarViewType.WEEK -> currentDate - DatePeriod(days = 7)
             CalendarViewType.MONTH -> currentDate - DatePeriod(months = 1)
         }
-        setCurrentDate(newDate)
+        updateCurrentDate(newDate)
     }
     
     private fun navigateToNextPeriod() {
@@ -256,11 +286,11 @@ class PlanningViewModel(
             CalendarViewType.WEEK -> currentDate + DatePeriod(days = 7)
             CalendarViewType.MONTH -> currentDate+ DatePeriod(months = 1)
         }
-        setCurrentDate(newDate)
+        updateCurrentDate(newDate)
     }
     
     private fun navigateToToday() {
-        setCurrentDate(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date)
+        updateCurrentDate(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date)
     }
     
     private fun updateTimeSlotStatus(timeSlotId: BaseId, status: TimeSlotStatus) {
@@ -300,7 +330,8 @@ class PlanningViewModel(
         val showEditTimeSlotDialog: Boolean = false,
         val clients: List<Client> = emptyList(),
         val animals: List<Animal> = emptyList(),
-        val services: List<Service> = emptyList()
+        val services: List<Service> = emptyList(),
+        val isTransitioning: Boolean = false
     )
     
     sealed class Event {

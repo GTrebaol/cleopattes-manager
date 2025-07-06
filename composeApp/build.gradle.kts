@@ -61,6 +61,7 @@ kotlin {
             implementation(libs.benasher44)
             implementation(libs.moko.resources)
             implementation(libs.moko.resources.compose)
+            implementation("com.kizitonwose.calendar:compose-multiplatform:2.7.0")
         }
 
         commonTest.dependencies {
