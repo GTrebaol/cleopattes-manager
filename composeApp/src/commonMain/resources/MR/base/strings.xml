@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Species translations -->
+    <string name="species_dog">Dog</string>
+    <string name="species_cat">Cat</string>
+    <string name="species_bird">Bird</string>
+    <string name="species_rodent">Rodent</string>
+    <string name="species_reptile">Reptile</string>
+    <string name="species_other">Other</string>
+    
+    <!-- Common strings -->
+    <string name="app_name">Cleopattes Manager</string>
+    <string name="add">Add</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    
+    <!-- App Title -->
+    <string name="app_title">Cal</string>
+    
+    <!-- Planning Screen -->
+    <string name="today_button">Aujourd\'hui</string>
+    <string name="add_button">+</string>
+    <string name="week_view_title">Vue Semaine</string>
+    <string name="month_view_title">Vue Mois</string>
+    
+    <!-- Time Slot Details Dialog -->
+    <string name="time_slot_details_title">Détails du rendez-vous</string>
+    <string name="service_label">Service: </string>
+    <string name="animal_label">Animal: </string>
+    <string name="client_label">Client: </string>
+    <string name="notes_label">Notes: </string>
+    <string name="view_animal_button">Voir l\'animal</string>
+    <string name="edit_button">Modifier</string>
+    <string name="delete_button">Supprimer</string>
+    <string name="close_button">Fermer</string>
+    
+    <!-- Filters -->
+    <string name="filters_title">Filtres</string>
+    <string name="all_clients">Tous les clients</string>
+    <string name="all_animals">Tous les animaux</string>
+    <string name="all_services">Tous les services</string>
+    <string name="client_label_text">Client</string>
+    <string name="animal_label_text">Animal</string>
+    <string name="service_label_text">Service</string>
+    <string name="clear_filters">Effacer les filtres</string>
+    
+    <!-- Common -->
+    <string name="loading">Chargement...</string>
+    <string name="error">Erreur</string>
+    <string name="retry">Réessayer</string>
+    <string name="confirm">Confirmer</string>
+    <string name="yes">Oui</string>
+    <string name="no">Non</string>
+    
+    <!-- Navigation -->
+    <string name="back">Retour</string>
+    <string name="next">Suivant</string>
+    <string name="previous">Précédent</string>
+    
+    <!-- Time -->
+    <string name="time_format">%02d:00</string>
+    <string name="date_format">dd/MM/yyyy</string>
+    <string name="datetime_format">dd/MM/yyyy HH:mm</string>
+    
+    <!-- Status -->
+    <string name="status_scheduled">Programmé</string>
+    <string name="status_in_progress">En cours</string>
+    <string name="status_completed">Terminé</string>
+    <string name="status_cancelled">Annulé</string>
+    
+    <!-- Messages -->
+    <string name="no_data_available">Aucune donnée disponible</string>
+    <string name="no_results_found">Aucun résultat trouvé</string>
+    <string name="operation_successful">Opération réussie</string>
+    <string name="operation_failed">Opération échouée</string>
+</resources> 

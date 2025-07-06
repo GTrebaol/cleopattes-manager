@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Species translations -->
+    <string name="species_dog">Perro</string>
+    <string name="species_cat">Gato</string>
+    <string name="species_bird">Pájaro</string>
+    <string name="species_rodent">Roedor</string>
+    <string name="species_reptile">Reptil</string>
+    <string name="species_other">Otro</string>
+    
+    <!-- Common strings -->
+    <string name="app_name">Cleopattes Manager</string>
+    <string name="add">Añadir</string>
+    <string name="edit">Editar</string>
+    <string name="delete">Eliminar</string>
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="ok">OK</string>
+</resources> 
